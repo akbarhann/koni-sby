@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                    BigInt           @id @default(autoincrement())
+  username              String           @unique
+  email                 String           @unique
+  password_hash         String
+  role                  Role
+  is_active             Boolean          @default(true)
+  created_at            DateTime         @default(now())
+  cabor_profile         CaborProfile?
+  club_profile          ClubProfile?
+  created_invitations   KoniInvitation[]
+}
+
+model KoniInvitation {
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  deskripsi  String?
+  expires_at DateTime
+  is_active  Boolean  @default(true)
+  created_by BigInt
+  created_at DateTime @default(now())
+  creator    User     @relation(fields: [created_by], references: [id])
+}
+
+model MasterCabor {
+  id             BigInt         @id @default(autoincrement())
+  nama_cabor     String         @unique
+  is_verified    Boolean        @default(false)
+  cabor_profiles CaborProfile[]
+}
+
+model CaborProfile {
+  id                      BigInt             @id @default(autoincrement())
+  user_id                 BigInt             @unique
+  master_cabor_id         BigInt
+  verification_status     VerificationStatus @default(PENDING)
+  club_registration_token String?            @unique
+  club_token_expires_at   DateTime?
+  // Profile management fields
+  description             String?            @db.Text
+  alamat_sekretariat      String?
+  email_resmi             String?
+  nomor_telepon           String?
+  // SK Legalitas fields
+  sk_file_url             String?
+  sk_file_name            String?
+  sk_start_date           DateTime?
+  sk_end_date             DateTime?
+  rejection_reason        String?
+
+  // Social Media
+  facebook_url  String?
+  instagram_url String?
+  website_url   String?
+  youtube_url   String?
+
+  // Organization Information (Text Fields)
+  org_structure       String? @db.Text // Struktur Organisasi
+  facilities          String? @db.Text // Sarana Prasarana
+  training_schedule   String? @db.Text // Jadwal Latihan (JSON)
+  training_location   String? @db.Text // Lokasi Latihan Puslatcab
+  development_program String? @db.Text // Program Pembinaan
+  achievements        String? @db.Text // Rekam Jejak / Prestasi
+
+  // Human Resources Stats
+  total_referees        Int @default(0)
+  total_coaches         Int @default(0)
+  total_athletes_manual Int @default(0)
+
+  // File Uploads
+  ad_art_file_url  String?
+  ad_art_file_name String?
+  master_cabor            MasterCabor        @relation(fields: [master_cabor_id], references: [id])
+  user                    User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  clubs                   ClubProfile[]
+}
+
+model ClubProfile {
+  id                  BigInt             @id @default(autoincrement())
+  user_id             BigInt             @unique
+  cabor_profile_id    BigInt
+  nama_club           String
+  alamat_basecamp     String?
+  jadwal_latihan      String?
+  lokasi_latihan      String?
+  legalitas_file_url  String?
+  logo_url            String?
+  verification_status VerificationStatus @default(PENDING)
+  nama_ketua          String?
+  nama_sekretaris     String?
+  is_onboarded        Boolean            @default(false)
+  rejection_reason    String?            @db.Text
+  athletes            Atlet[]
+  parent_cabor        CaborProfile       @relation(fields: [cabor_profile_id], references: [id])
+  user                User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Atlet {
+  id              String      @id @default(cuid())
+  club_id         BigInt
+  nik             String      @unique
+  nama            String
+  tempat_lahir    String
+  tgl_lahir       DateTime
+  jenis_kelamin   Gender
+  tinggi_badan    Int?
+  berat_badan     Int?
+  ukuran_baju     String?
+  ukuran_sepatu   Int?
+  no_hp           String?
+  url_foto        String?
+  total_poin      Int         @default(0)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  club            ClubProfile @relation(fields: [club_id], references: [id])
+  daftar_prestasi Prestasi[]
+
+  @@map("atlet")
+}
+
+model Prestasi {
+  id                String           @id @default(cuid())
+  atlet_id          String
+  nama_kejuaraan    String
+  tahun             Int
+  tingkat           TingkatPrestasi
+  medali            TipeMedali
+  url_bukti         String?
+  status_verifikasi StatusVerifikasi @default(PENDING)
+  nilai_poin        Int              @default(0)
+  created_at        DateTime         @default(now())
+  atlet             Atlet            @relation(fields: [atlet_id], references: [id])
+}
+
+model AturanPoin {
+  id      Int             @id @default(autoincrement())
+  tingkat TingkatPrestasi
+  medali  TipeMedali
+  poin    Int
+
+  @@unique([tingkat, medali])
+}
+
+enum Role {
+  ADMIN_KONI
+  ADMIN_CABOR
+  ADMIN_CLUB
+}
+
+enum VerificationStatus {
+  DRAFT
+  PENDING
+  SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+enum ChampionshipLevel {
+  KOTA
+  PROVINSI
+  NASIONAL
+  INTERNASIONAL
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum TingkatPrestasi {
+  INTERNATIONAL
+  NATIONAL
+  PROVINCIAL
+  CITY
+  DISTRICT
+}
+
+enum TipeMedali {
+  GOLD
+  SILVER
+  BRONZE
+  PARTICIPANT
+}
+
+enum StatusVerifikasi {
+  PENDING
+  VERIFIED
+  REJECTED
+}
