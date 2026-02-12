@@ -19,9 +19,16 @@ export type Athlete = {
     id: string;
     nik: string;
     nama: string;
-    jenis_kelamin: string;
+    tempat_lahir: string;
     tgl_lahir: Date | string;
-    // Add other fields as needed for display
+    jenis_kelamin: string;
+    tinggi_badan?: number | null;
+    berat_badan?: number | null;
+    ukuran_baju?: string | null;
+    ukuran_sepatu?: number | null;
+    no_hp?: string | null;
+    url_foto?: string | null;
+    club_id?: string | bigint;
 };
 
 const ITEMS_PER_PAGE = 10;
