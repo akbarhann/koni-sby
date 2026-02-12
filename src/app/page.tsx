@@ -808,15 +808,15 @@ function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-white/60">
                 <MapPin className="h-5 w-5 text-koni-gold flex-shrink-0 mt-0.5" />
-                <span>Jl. Jimerto No. 25-27, Surabaya 60131</span>
+                <span>jl. Bogen no.1</span>
               </li>
               <li className="flex items-center gap-3 text-white/60">
                 <Phone className="h-5 w-5 text-koni-gold flex-shrink-0" />
-                <span>(031) 5312345</span>
+                <span>(031) 123456789</span>
               </li>
               <li className="flex items-center gap-3 text-white/60">
                 <Mail className="h-5 w-5 text-koni-gold flex-shrink-0" />
-                <span>info@konisurabaya.or.id</span>
+                <span>gmail koni</span>
               </li>
             </ul>
           </div>
